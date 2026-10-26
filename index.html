@@ -1,0 +1,432 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light}body{margin:0}</style></head><body>
+<title>Lesson Notes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one calm column. Controls on top, live transcript in the middle, notes underneath. Highlighter yellow is the only loud colour, reserved for flagged moments. */
+:root {
+  --bg: #f2f5f8;
+  --surface: #ffffff;
+  --ink: #13202c;
+  --muted: #566677;
+  --line: #d8e0e8;
+  --mark: #ffe04a;
+  --mark-ink: #13202c;
+  --rec: #d92d20;
+  --focus: #1b5fd1;
+  --wash: #e9eef3;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e151c; --surface: #161f28; --ink: #e8eef3; --muted: #93a4b3; --line: #26323d;
+    --mark: #e9c62b; --mark-ink: #13202c; --rec: #ff7468; --focus: #7fb0ff; --wash: #1d2833;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e151c; --surface: #161f28; --ink: #e8eef3; --muted: #93a4b3; --line: #26323d;
+  --mark: #e9c62b; --mark-ink: #13202c; --rec: #ff7468; --focus: #7fb0ff; --wash: #1d2833;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 15px; line-height: 1.55;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+button, select, input, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.top { display: flex; flex-direction: column; gap: 4px; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+#title {
+  width: 100%; border: 0; border-bottom: 2px solid var(--line); background: transparent;
+  font-family: var(--display); font-weight: 700; font-size: clamp(26px, 5vw, 38px); line-height: 1.15;
+  padding: 4px 0 8px; text-wrap: balance; border-radius: 0;
+}
+#title::placeholder { color: var(--muted); opacity: .7; }
+#title:focus-visible { outline: none; border-bottom-color: var(--focus); }
+.bar { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+.rec-btn {
+  display: inline-flex; align-items: center; gap: 10px; border: 0; cursor: pointer;
+  background: var(--ink); color: var(--bg); padding: 12px 22px; border-radius: 999px; font-weight: 600; font-size: 16px;
+}
+.rec-btn .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--rec); }
+.rec-btn[aria-pressed="true"] { background: var(--rec); color: #fff; }
+.rec-btn[aria-pressed="true"] .dot { background: #fff; border-radius: 3px; }
+body.live .rec-btn .dot { animation: pulse 1.4s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { body.live .rec-btn .dot { animation: none; } }
+.rec-btn:disabled { opacity: .45; cursor: not-allowed; }
+#clock { font-family: var(--mono); font-size: 22px; font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+.spacer { flex: 1 1 auto; }
+select, .ghost {
+  background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: pointer;
+}
+.ghost:hover, select:hover { border-color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tags .lab { font-size: 13px; color: var(--muted); margin-right: 2px; }
+.tag {
+  background: var(--mark); color: var(--mark-ink); border: 0; border-radius: 6px; padding: 6px 12px; font-weight: 500; cursor: pointer; font-size: 14px;
+}
+.tag:hover { filter: brightness(.95); }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.panel-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.panel-h h2 { margin: 0; font-family: var(--display); font-size: 18px; font-weight: 700; }
+.status { font-size: 13px; color: var(--muted); }
+#log { padding: 8px 18px 16px; min-height: 260px; max-height: 52vh; overflow-y: auto; }
+.row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.row:last-child { border-bottom: 0; }
+.ts { font-family: var(--mono); font-size: 12.5px; color: var(--muted); padding-top: 3px; font-variant-numeric: tabular-nums; }
+.txt { overflow-wrap: anywhere; }
+.row.m .txt span { background: var(--mark); color: var(--mark-ink); padding: 2px 10px; border-radius: 4px; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
+.row.interim .txt { color: var(--muted); font-style: italic; }
+.empty { color: var(--muted); padding: 28px 0; max-width: 46ch; }
+.empty strong { color: var(--ink); }
+.note { margin: 0; padding: 12px 18px; background: var(--wash); color: var(--ink); border-radius: 10px; font-size: 14px; }
+.note[hidden] { display: none; }
+details.panel { padding: 0; }
+details.panel summary { cursor: pointer; padding: 12px 18px; font-weight: 600; list-style-position: inside; }
+details .inner { padding: 0 18px 16px; display: flex; flex-direction: column; gap: 10px; }
+textarea {
+  width: 100%; min-height: 120px; resize: vertical; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px;
+}
+.actions { display: flex; flex-wrap: wrap; gap: 10px; padding: 14px 18px; }
+.primary { background: var(--ink); color: var(--bg); border: 0; border-radius: 8px; padding: 10px 18px; font-weight: 600; cursor: pointer; }
+.primary:disabled { opacity: .5; cursor: wait; }
+#notes { padding: 0 18px 18px; }
+#notes:empty { display: none; }
+#notes h3 { font-family: var(--display); font-size: 20px; margin: 22px 0 6px; }
+#notes h4 { font-size: 15px; margin: 16px 0 4px; }
+#notes p { margin: 6px 0; }
+#notes ul { margin: 6px 0; padding-left: 22px; }
+#notes li { margin: 3px 0; }
+.foot { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; }
+.foot button { background: none; border: 0; padding: 0; color: var(--muted); text-decoration: underline; cursor: pointer; }
+@media (max-width: 520px) {
+  .row { grid-template-columns: 52px minmax(0, 1fr); gap: 8px; }
+  .spacer { display: none; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span class="eyebrow">Lesson note-taker</span>
+    <input id="title" type="text" placeholder="Name this lesson" autocomplete="off" aria-label="Lesson name">
+  </header>
+
+  <p class="note" id="compat" hidden></p>
+
+  <section class="bar" aria-label="Recording controls">
+    <button class="rec-btn" id="rec" type="button" aria-pressed="false"><span class="dot"></span><span id="recLabel">Start lesson</span></button>
+    <span id="clock" aria-live="off">00:00</span>
+    <span class="spacer"></span>
+    <label class="status" for="lang">Language</label>
+    <select id="lang">
+      <option value="en-GB">English (UK)</option>
+      <option value="en-US">English (US)</option>
+      <option value="en-AU">English (Australia)</option>
+      <option value="fr-FR">Français</option>
+      <option value="de-DE">Deutsch</option>
+      <option value="es-ES">Español</option>
+      <option value="ar-SA">العربية</option>
+    </select>
+  </section>
+
+  <section class="tags" aria-label="Flag a moment">
+    <span class="lab">Flag this moment</span>
+    <button class="tag" type="button" data-type="key">Key point</button>
+    <button class="tag" type="button" data-type="homework">Homework</button>
+    <button class="tag" type="button" data-type="question">Question</button>
+    <button class="tag" type="button" data-type="exam">Exam tip</button>
+  </section>
+
+  <section class="panel" aria-label="Transcript">
+    <div class="panel-h"><h2>Transcript</h2><span class="status" id="status">Not recording</span></div>
+    <div id="log" role="log" aria-live="polite"></div>
+  </section>
+
+  <details class="panel" id="pasteBox">
+    <summary>Paste a transcript or typed notes instead</summary>
+    <div class="inner">
+      <textarea id="paste" placeholder="Paste captions from Zoom, Teams or Meet, or your own rough notes. Blank lines split it into entries."></textarea>
+      <div><button class="ghost" type="button" id="addPaste">Add to transcript</button></div>
+    </div>
+  </details>
+
+  <section class="panel" aria-label="Notes">
+    <div class="panel-h"><h2>Notes</h2><span class="status" id="nstatus"></span></div>
+    <div class="actions">
+      <button class="primary" type="button" id="make" hidden>Make notes</button>
+      <button class="ghost" type="button" id="copy">Copy for Claude</button>
+      <button class="ghost" type="button" id="save">Save as .md</button>
+    </div>
+    <div id="notes"></div>
+  </section>
+
+  <div class="foot">
+    <span id="saved">Saved in this browser as you go.</span>
+    <button type="button" id="reset">Start a new lesson</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = "lesson-notes-v1";
+  var LABEL = { key: "Key point", homework: "Homework", question: "Question", exam: "Exam tip" };
+  var S = { title: "", lang: "en-GB", acc: 0, items: [], notes: "" };
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null, running = false, startedAt = 0, ticker = null, wake = null, interim = "", armed = false;
+
+  try { var raw = localStorage.getItem(KEY); if (raw) S = Object.assign(S, JSON.parse(raw)); } catch (e) {}
+  var saveTimer;
+  function persist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(function () { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }, 300);
+  }
+  function elapsed() { return S.acc + (running ? Date.now() - startedAt : 0); }
+  function fmt(ms) {
+    var s = Math.floor(ms / 1000), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return (h ? h + ":" + p(m) : p(m)) + ":" + p(sec);
+  }
+
+  function renderLog() {
+    var log = $("log");
+    var stick = log.scrollTop + log.clientHeight >= log.scrollHeight - 40;
+    log.textContent = "";
+    if (!S.items.length && !interim) {
+      var e = document.createElement("div");
+      e.className = "empty";
+      e.innerHTML = "<strong>Nothing heard yet.</strong> Press Start lesson and words will appear here as they are spoken. Use the yellow buttons to flag key points, homework and questions as they happen.";
+      log.appendChild(e);
+      return;
+    }
+    S.items.forEach(function (it) {
+      var r = document.createElement("div");
+      r.className = "row" + (it.k === "m" ? " m" : "");
+      var t = document.createElement("div"); t.className = "ts"; t.textContent = it.t == null ? "" : fmt(it.t);
+      var x = document.createElement("div"); x.className = "txt";
+      if (it.k === "m") { var sp = document.createElement("span"); sp.textContent = LABEL[it.type] || it.type; x.appendChild(sp); }
+      else x.textContent = it.text;
+      r.appendChild(t); r.appendChild(x); log.appendChild(r);
+    });
+    if (interim) {
+      var ri = document.createElement("div"); ri.className = "row interim";
+      var ti = document.createElement("div"); ti.className = "ts"; ti.textContent = fmt(elapsed());
+      var xi = document.createElement("div"); xi.className = "txt"; xi.textContent = interim;
+      ri.appendChild(ti); ri.appendChild(xi); log.appendChild(ri);
+    }
+    if (stick) log.scrollTop = log.scrollHeight;
+  }
+
+  function setStatus(t) { $("status").textContent = t; }
+  function showNote(t) { var n = $("compat"); n.textContent = t; n.hidden = !t; }
+
+  function updateUI() {
+    document.body.classList.toggle("live", running);
+    $("rec").setAttribute("aria-pressed", running ? "true" : "false");
+    $("recLabel").textContent = running ? "End lesson" : (S.acc > 0 ? "Resume lesson" : "Start lesson");
+    $("clock").textContent = fmt(elapsed());
+    setStatus(running ? "Listening" : "Not recording");
+  }
+
+  function requestWake() {
+    try { if (navigator.wakeLock) navigator.wakeLock.request("screen").then(function (w) { wake = w; }, function () {}); } catch (e) {}
+  }
+  function releaseWake() { try { if (wake) { wake.release(); wake = null; } } catch (e) {} }
+  document.addEventListener("visibilitychange", function () { if (running && document.visibilityState === "visible") requestWake(); });
+
+  function begin() {
+    rec = new SR();
+    rec.continuous = true; rec.interimResults = true; rec.lang = S.lang;
+    rec.onresult = function (ev) {
+      var tmp = "";
+      for (var i = ev.resultIndex; i < ev.results.length; i++) {
+        var r = ev.results[i];
+        if (r.isFinal) {
+          var text = r[0].transcript.trim();
+          if (text) S.items.push({ k: "s", t: elapsed(), text: text.charAt(0).toUpperCase() + text.slice(1) });
+        } else tmp += r[0].transcript;
+      }
+      interim = tmp.trim(); renderLog(); persist();
+    };
+    rec.onerror = function (ev) {
+      if (ev.error === "no-speech" || ev.error === "aborted") return;
+      if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+        showNote("This page cannot use the microphone. Open it in its own browser tab, allow microphone access when asked, and try again.");
+        end();
+      } else if (ev.error === "network") {
+        showNote("Speech recognition lost its connection. It will keep trying while you stay online.");
+      } else showNote("Speech recognition stopped (" + ev.error + ").");
+    };
+    rec.onend = function () {
+      if (running) setTimeout(function () { if (running) { try { rec.start(); } catch (e) {} } }, 300);
+    };
+    running = true; startedAt = Date.now();
+    try { rec.start(); } catch (e) { running = false; showNote("Could not start listening. Check microphone access."); }
+    requestWake(); updateUI();
+    clearInterval(ticker); ticker = setInterval(function () { $("clock").textContent = fmt(elapsed()); }, 500);
+  }
+  function end() {
+    if (running) { S.acc += Date.now() - startedAt; }
+    running = false;
+    try { if (rec) rec.stop(); } catch (e) {}
+    clearInterval(ticker); releaseWake(); interim = ""; renderLog(); updateUI(); persist();
+  }
+  $("rec").addEventListener("click", function () { if (!SR) return; showNote(""); running ? end() : begin(); });
+
+  document.querySelectorAll(".tag").forEach(function (b) {
+    b.addEventListener("click", function () {
+      S.items.push({ k: "m", t: elapsed(), type: b.getAttribute("data-type") });
+      renderLog(); persist();
+    });
+  });
+
+  $("title").value = S.title;
+  $("title").addEventListener("input", function () { S.title = $("title").value; persist(); });
+  $("lang").value = S.lang;
+  $("lang").addEventListener("change", function () {
+    S.lang = $("lang").value; persist();
+    if (running) { end(); begin(); }
+  });
+
+  $("addPaste").addEventListener("click", function () {
+    var parts = $("paste").value.split(/\n\s*\n|\r\n\s*\r\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!parts.length) return;
+    parts.forEach(function (p) { S.items.push({ k: "s", t: null, text: p }); });
+    $("paste").value = ""; renderLog(); persist();
+  });
+
+  /* ---- notes ---- */
+  function transcriptText() {
+    return S.items.map(function (it) {
+      if (it.k === "m") return ">>> FLAGGED: " + (LABEL[it.type] || it.type) + (it.t != null ? " at " + fmt(it.t) : "");
+      return (it.t != null ? "[" + fmt(it.t) + "] " : "") + it.text;
+    }).join("\n");
+  }
+  function buildPrompt() {
+    return [
+      "You are taking notes for a student from a lesson" + (S.title ? " called \"" + S.title + "\"" : "") + ". Use British English.",
+      "The transcript below came from live speech recognition, so expect missing punctuation, mis-heard words and false starts. Lines starting >>> FLAGGED are moments the student flagged while listening. Only use what is in the transcript. If something is unclear, write [unclear] rather than guessing.",
+      "",
+      "Produce these four sections, in this order:",
+      "## Summary",
+      "A short overview, then the key points as bullets. Add definitions, formulae and worked examples where they were given.",
+      "## Action items and homework",
+      "Every task, deadline, reading and thing to bring, with the due date if one was said. Say \"None heard\" if there are none.",
+      "## Questions to revise",
+      "Five or so questions the student should be able to answer after this lesson.",
+      "## Cleaned transcript",
+      "The full transcript with punctuation fixed, filler removed and paragraph breaks added. Keep a timestamp at the start of each paragraph where the original had one. Mark flagged moments in bold.",
+      "",
+      "TRANSCRIPT",
+      transcriptText()
+    ].join("\n");
+  }
+
+  function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function inline(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>"); }
+  function md(text) {
+    var out = [], inList = false;
+    text.split("\n").forEach(function (line) {
+      var m;
+      if ((m = /^\s*[-*]\s+(.*)/.exec(line))) {
+        if (!inList) { out.push("<ul>"); inList = true; }
+        out.push("<li>" + inline(m[1]) + "</li>"); return;
+      }
+      if (inList) { out.push("</ul>"); inList = false; }
+      if ((m = /^#{1,2}\s+(.*)/.exec(line))) out.push("<h3>" + inline(m[1]) + "</h3>");
+      else if ((m = /^#{3,}\s+(.*)/.exec(line))) out.push("<h4>" + inline(m[1]) + "</h4>");
+      else if (line.trim()) out.push("<p>" + inline(line) + "</p>");
+    });
+    if (inList) out.push("</ul>");
+    return out.join("");
+  }
+  function renderNotes() { $("notes").innerHTML = S.notes ? md(S.notes) : ""; }
+
+  var sampleFn = null;
+  function initSample() {
+    try {
+      if (window.claude && window.claude.use) {
+        window.claude.use("sample").then(function (s) { if (s) { sampleFn = s; $("make").hidden = false; } }, function () {});
+      }
+    } catch (e) {}
+  }
+  $("make").addEventListener("click", function () {
+    if (!sampleFn) return;
+    if (!S.items.some(function (i) { return i.k === "s"; })) { $("nstatus").textContent = "Add some transcript first."; return; }
+    $("make").disabled = true; $("nstatus").textContent = "Writing notes...";
+    sampleFn(buildPrompt(), { cache: false, modelTier: "default", onText: function (r) { S.notes = r.text; renderNotes(); } })
+      .then(function (r) { S.notes = r.text; renderNotes(); persist(); $("nstatus").textContent = r.truncated ? "Notes were cut short. Try again with a shorter lesson." : "Done"; })
+      .catch(function (e) {
+        $("nstatus").textContent = e && e.code === "rate_limited" ? "Too many requests. Wait a minute." : "Could not make notes here. Use Copy for Claude.";
+      })
+      .then(function () { $("make").disabled = false; });
+  });
+
+  function copyText(text, done) {
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta); done(ok);
+    }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, fallback); } catch (e) { fallback(); }
+  }
+  $("copy").addEventListener("click", function () {
+    if (!S.items.length) { $("nstatus").textContent = "Nothing to copy yet."; return; }
+    copyText(buildPrompt(), function (ok) {
+      $("nstatus").textContent = ok ? "Copied. Paste it into Claude." : "Copy was blocked. Select the transcript and copy it by hand.";
+    });
+  });
+
+  function fileName() { return (S.title || "lesson").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") + ".md"; }
+  function fileBody() {
+    return "# " + (S.title || "Lesson") + "\n\n" + (S.notes ? S.notes + "\n\n---\n\n" : "") + "## Raw transcript\n\n" + transcriptText() + "\n";
+  }
+  $("save").addEventListener("click", function () {
+    if (!S.items.length && !S.notes) { $("nstatus").textContent = "Nothing to save yet."; return; }
+    var body = fileBody(), name = fileName();
+    function local() {
+      try {
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([body], { type: "text/markdown" })); a.download = name;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        $("nstatus").textContent = "Saved";
+      } catch (e) { $("nstatus").textContent = "Saving was blocked here."; }
+    }
+    if (window.claude && window.claude.use) {
+      window.claude.use("downloads").then(function (d) {
+        if (!d) return local();
+        d.save({ filename: name, data: body }).then(function () { $("nstatus").textContent = "Saved"; }, function (e) {
+          if (!e || e.code !== "declined") $("nstatus").textContent = "Could not save here.";
+        });
+      }, local);
+    } else local();
+  });
+
+  var armReset = false, resetTimer;
+  $("reset").addEventListener("click", function () {
+    if (!armReset) { armReset = true; $("reset").textContent = "Press again to clear this lesson"; resetTimer = setTimeout(function () { armReset = false; $("reset").textContent = "Start a new lesson"; }, 4000); return; }
+    clearTimeout(resetTimer); armReset = false; $("reset").textContent = "Start a new lesson";
+    if (running) end();
+    S = { title: "", lang: S.lang, acc: 0, items: [], notes: "" };
+    $("title").value = ""; interim = ""; renderLog(); renderNotes(); updateUI(); persist(); $("nstatus").textContent = "";
+  });
+
+  if (!SR) {
+    $("rec").disabled = true;
+    showNote("Live recording needs Chrome, Edge or Safari with this page open in its own tab. You can still paste a transcript below and make notes from it.");
+    $("pasteBox").open = true;
+  }
+  renderLog(); renderNotes(); updateUI(); initSample();
+})();
+</script>
+
+</body></html>
